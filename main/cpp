@@ -1,0 +1,69 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+// Структура для запису (приклад: Студент)
+struct Record {
+    int id;
+    char name[50];
+    double score;
+};
+
+void addRecord(const string& filename) {
+    ofstream outFile(filename, ios::binary | ios::app);
+    if (!outFile) {
+        cerr << "Помилка відкриття файлу!" << endl;
+        return;
+    }
+
+    Record r;
+    cout << "Введіть ID: ";
+    cin >> r.id;
+    cout << "Введіть ім'я: ";
+    cin.ignore();
+    cin.getline(r.name, 50);
+    cout << "Введіть бал: ";
+    cin >> r.score;
+
+    outFile.write(reinterpret_cast<char*>(&r), sizeof(Record));
+    outFile.close();
+    cout << "Запис додано успішно." << endl;
+}
+
+void displayRecords(const string& filename) {
+    ifstream inFile(filename, ios::binary);
+    if (!inFile) {
+        cerr << "Файл порожній або не знайдений." << endl;
+        return;
+    }
+
+    Record r;
+    cout << "\n--- Список записів у бінарному файлі ---" << endl;
+    while (inFile.read(reinterpret_cast<char*>(&r), sizeof(Record))) {
+        cout << "ID: " << r.id << " | Ім'я: " << r.name << " | Бал: " << r.score << endl;
+    }
+    inFile.close();
+}
+
+int main() {
+    setlocale(LC_ALL, "Ukrainian");
+    string filename = "data.bin";
+    int choice;
+
+    do {
+        cout << "\n1. Додати запис\n2. Показати всі записи\n0. Вихід\nВаш вибір: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: addRecord(filename); break;
+            case 2: displayRecords(filename); break;
+            case 0: cout << "Вихід..." << endl; break;
+            default: cout << "Невірний вибір!" << endl;
+        }
+    } while (choice != 0);
+
+    return 0;
+}
